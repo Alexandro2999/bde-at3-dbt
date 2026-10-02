@@ -1,0 +1,12 @@
+sources:
+  - name: raw
+    description: Raw tables in the bronze schema, loaded by the Airflow DAG
+    database: postgres
+    schema: bronze
+
+    tables:
+      - name: raw_listings
+      - name: raw_census_g01
+      - name: raw_census_g02
+      - name: raw_nsw_lga_code
+      - name: raw_nsw_lga_suburb
