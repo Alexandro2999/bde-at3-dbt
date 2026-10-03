@@ -1,0 +1,157 @@
+version: 2
+
+# Data tests (dbt docs: data tests; Lecture 5: unique / not_null).
+# They run with dbt test and dbt build, after every monthly load.
+# Dimension keys are unique per (key, valid_from), not per key,
+# because SCD2 keeps several versions of the same key.
+
+models:
+
+  # ---------- Silver ----------
+  - name: s_listings
+    description: "Cleaned listings, one row per listing per monthly file."
+    columns:
+      - name: listing_row_id
+        data_tests: [unique, not_null]
+
+  - name: s_host
+    description: "One row per host (latest month); input of host_snapshot."
+    columns:
+      - name: host_id
+        data_tests: [unique, not_null]
+
+  - name: s_listing_latest
+    description: "One row per listing (latest month); input of listing_snapshot."
+    columns:
+      - name: listing_id
+        data_tests: [unique, not_null]
+
+  - name: s_nsw_lga_suburb
+    description: "Suburb to LGA mapping with the 5 proven corrections (D4)."
+    columns:
+      - name: suburb_name
+        data_tests: [unique, not_null]
+
+  - name: s_nsw_lga_code
+    description: "LGA code and name; the fact finds listing_lga_code by LGA name."
+    columns:
+      - name: lga_code
+        data_tests: [unique, not_null]
+      - name: lga_name_upper
+        data_tests: [unique, not_null]
+
+  # ---------- Gold dimensions (SCD2) ----------
+  - name: g_dim_listing
+    description: "SCD2 listing dimension from listing_snapshot, with unknown row 0."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [listing_id, valid_from]
+    columns:
+      - name: listing_id
+        data_tests: [not_null]
+
+  - name: g_dim_host
+    description: "SCD2 host dimension from host_snapshot, with unknown row 0."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [host_id, valid_from]
+    columns:
+      - name: host_id
+        data_tests: [not_null]
+
+  - name: g_dim_lga
+    description: "SCD2 LGA dimension from lga_snapshot, with unknown row '0'."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [lga_code, valid_from]
+    columns:
+      - name: lga_code
+        data_tests: [not_null]
+
+  - name: g_dim_suburb
+    description: "SCD2 suburb dimension from suburb_snapshot, with unknown row 'UNKNOWN'."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [suburb_name, valid_from]
+    columns:
+      - name: suburb_name
+        data_tests: [not_null]
+
+  # ---------- Gold fact ----------
+  - name: g_fact_listings
+    description: "Fact: one row per listing per month; keys to 4 dimensions and metrics only."
+    columns:
+      - name: listing_row_id
+        data_tests: [unique, not_null]
+      - name: listing_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('g_dim_listing')
+                field: listing_id
+      - name: host_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('g_dim_host')
+                field: host_id
+      - name: listing_lga_code
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('g_dim_lga')
+                field: lga_code
+      - name: host_suburb
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('g_dim_suburb')
+                field: suburb_name
+      - name: price
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: availability_30
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 30
+      - name: is_active
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [0, 1]
+                quote: false
+
+  # ---------- Datamarts: one row per group and month ----------
+  - name: dm_listing_neighbourhood
+    description: "Datamart view per listing_neighbourhood and month (brief Part 2)."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [listing_neighbourhood, month_year]
+
+  - name: dm_property_type
+    description: "Datamart view per property_type, room_type, accommodates and month."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [property_type, room_type, accommodates, month_year]
+
+  - name: dm_host_neighbourhood
+    description: "Datamart view per host_neighbourhood_lga and month."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [host_neighbourhood_lga, month_year]
