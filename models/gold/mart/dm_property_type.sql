@@ -7,9 +7,9 @@
 
 -- Datamart dm_property_type: one row per property_type, room_type,
 -- accommodates and month/year, ordered by these columns.
--- (brief Part 3, design decisions G1, G4, D5, Lab 6.3 pattern)
+-- (brief Part 2 step 2, design decisions G1, G4, D5, Lab 6.3 pattern)
 -- 1. property_type, room_type and accommodates come from dim_listing with
---    the SCD2 join (scraped_date between valid_from and valid_to), so each
+--    the SCD2 join (valid_from <= scraped_date < valid_to), so each
 --    row uses the listing version that was valid on that date.
 --    property_type uses the new names for all months (D5).
 -- 2. Superhost status comes from dim_host with the same SCD2 join.
@@ -19,6 +19,7 @@
 --    price, review score, stays and revenue use active listings only;
 --    superhost rate = distinct superhosts / distinct hosts * 100;
 --    stays = 30 - availability_30; revenue = stays * price;
+--    total stays is 0 (not NULL) when a group has no active listing;
 --    average revenue per active listing = total revenue / active listings;
 --    % change = (this month - previous month) / previous month * 100,
 --    NULL when the previous row is not exactly one month earlier or the
@@ -66,7 +67,7 @@ monthly as (
         count(distinct host_id) as distinct_hosts,
         count(distinct host_id) filter (where host_is_superhost) as distinct_superhosts,
         avg(review_scores_rating) filter (where is_active = 1) as avg_review_scores_rating,
-        sum(stays) as total_stays,
+        coalesce(sum(stays), 0) as total_stays,
         sum(stays * price) as total_revenue
     from facts
     group by property_type, room_type, accommodates, month_year

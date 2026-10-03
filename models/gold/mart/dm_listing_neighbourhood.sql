@@ -7,9 +7,9 @@
 
 -- Datamart dm_listing_neighbourhood: one row per listing_neighbourhood
 -- (LGA) and month/year, ordered by listing_neighbourhood and month/year.
--- (brief Part 3, design decisions G1, G4, Lab 6.3 pattern)
+-- (brief Part 2 step 2, design decisions G1, G4, Lab 6.3 pattern)
 -- 1. The fact is joined to dim_lga and dim_host with the SCD2 join
---    (scraped_date between valid_from and valid_to), so each row uses
+--    (valid_from <= scraped_date < valid_to), so each row uses
 --    the dimension version that was valid on that date.
 -- 2. Metric definitions from the brief:
 --    active listing = has_availability 't' (is_active = 1);
@@ -17,6 +17,7 @@
 --    price, review score, stays and revenue use active listings only;
 --    superhost rate = distinct superhosts / distinct hosts * 100;
 --    stays = 30 - availability_30; revenue = stays * price;
+--    total stays is 0 (not NULL) when a group has no active listing;
 --    average revenue per active listing = total revenue / active listings;
 --    % change = (this month - previous month) / previous month * 100.
 -- 3. % change uses lag() per neighbourhood and is NULL when the previous
@@ -61,7 +62,7 @@ monthly as (
         count(distinct host_id) as distinct_hosts,
         count(distinct host_id) filter (where host_is_superhost) as distinct_superhosts,
         avg(review_scores_rating) filter (where is_active = 1) as avg_review_scores_rating,
-        sum(stays) as total_stays,
+        coalesce(sum(stays), 0) as total_stays,
         sum(stays * price) as total_revenue
     from facts
     group by listing_neighbourhood, month_year
