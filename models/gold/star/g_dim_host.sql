@@ -11,8 +11,8 @@
 -- 1. valid_from of the first version of each host is set to 1900-01-01,
 --    so facts dated before the first snapshot run still find a version.
 -- 2. valid_to is dbt_valid_to (NULL = current version).
--- 3. An Unknown row (host_id 0) is added for facts with no match, e.g.
---    hosts whose host values are always empty (D3).
+-- 3. An Unknown row (host_id 0) is added for facts with no match
+--    (Lab 6.3 pattern).
 -- The unknown values are cast to the snapshot column types, so the
 -- union all works.
 

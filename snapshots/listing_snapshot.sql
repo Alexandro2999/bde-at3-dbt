@@ -10,7 +10,9 @@
 
 -- SCD2 history of listing attributes (timestamp strategy).
 -- Input s_listing_latest has one row per listing; updated_at is the
--- cleaned scraped_date.
+-- first date of the listing's current version (the month when its
+-- values last changed, D2/G2), so a new version is added only when the
+-- listing values really change (dbt_checks.sql 10).
 
 select
     listing_id,

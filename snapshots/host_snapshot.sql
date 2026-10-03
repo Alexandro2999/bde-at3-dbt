@@ -10,7 +10,9 @@
 
 -- SCD2 history of hosts (brief Part 2: decompose listings into entities,
 -- timestamp strategy). Input s_host has one row per host; updated_at is
--- the earliest cleaned scraped_date of the host in its latest month.
+-- the first date of the host's current version (the month when its
+-- values last changed, D2/G2), so a new version is added only when the
+-- host values really change (dbt_checks.sql 10).
 
 select
     host_id,

@@ -10,9 +10,9 @@
 --    'Gundagai' (data_exploration_nsw_lga.sql), so UPPER makes all names
 --    the same case. SUBURB_NAME is unique before and after cleaning
 --    (dbt_checks.sql 2a, 2b).
--- 2. The 4 corrections in s_suburb_override replace the LGA from the file
---    (dbt_checks.sql 3a, 3b). The LGA from the file is kept in
---    lga_name_in_file, and is_corrected shows which rows changed.
+-- 2. The 5 corrections in s_suburb_override replace the LGA from the file
+--    (dbt_checks.sql 3a, 3b, 3d). The LGA from the file is kept in
+--    lga_name_in_file, and is_corrected shows which rows changed (5b).
 
 with
 

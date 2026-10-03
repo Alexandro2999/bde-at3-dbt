@@ -10,8 +10,9 @@
 -- (design decisions G1, G4, D4, Lab 6.3 pattern)
 -- 1. Keys to the 4 dimensions (G1):
 --    listing_id -> dim_listing, host_id -> dim_host: 0 (unknown) when the
---    key is not in the dimension (Lab 6.3 pattern). host_id 0 is used for
---    hosts whose host values are always empty (D3).
+--    key is not in the dimension (Lab 6.3 pattern). Every host is in
+--    dim_host (also hosts with always empty values, D3), so host_id 0 is
+--    only a safety fallback (check 12a: 0 rows).
 --    listing_lga_code -> dim_lga: found from listing_neighbourhood, using the
 --    LGA version valid on scraped_date. '0' when there is no match.
 --    host_suburb -> dim_suburb: host_neighbourhood when it is a suburb in

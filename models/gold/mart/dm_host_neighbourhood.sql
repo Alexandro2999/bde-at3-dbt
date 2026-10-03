@@ -7,11 +7,11 @@
 
 -- Datamart dm_host_neighbourhood: one row per host_neighbourhood_lga and
 -- month/year, ordered by host_neighbourhood_lga and month/year.
--- (brief Part 3, design decisions G1, D4, Lab 6.3 pattern)
+-- (brief Part 2 step 2, design decisions G1, D4, Lab 6.3 pattern)
 -- 1. host_neighbourhood_lga: the fact key host_suburb is joined to
 --    dim_suburb (suburb -> LGA name), then to dim_lga for the LGA name
 --    as written in NSW_LGA_CODE. Both joins use the SCD2 join
---    (scraped_date between valid_from and valid_to).
+--    (valid_from <= scraped_date < valid_to).
 -- 2. The UNKNOWN suburb (NULL and OVERSEAS host_neighbourhood, D4)
 --    matches the Unknown row of dim_lga, so it is shown as 'Unknown'.
 -- 3. Metric definitions from the brief:

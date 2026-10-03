@@ -16,7 +16,8 @@
 -- 2. property_type: the naming style changed between May and August 2020
 --    (queries 17, 19). Rows scraped before 2020-08-01 are recoded to the
 --    new style with a rule based on room_type. The raw value is kept.
---    The rule is checked in dbt_checks.sql after all months are loaded.
+--    The rule will be checked again in dbt_checks.sql after all months
+--    are loaded (Part 3).
 -- 3. host_neighbourhood: UPPER and TRIM (the suburb file is uppercase),
 --    WAVERLY -> WAVERLEY (checks 3a, 3b), empty -> NULL.
 -- 4. t/f flags become boolean (queries 3, 4, 5). scrape_id is dropped
