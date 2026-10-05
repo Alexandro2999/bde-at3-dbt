@@ -6,7 +6,8 @@
 }}
 
 -- Silver listings: one row per listing per month (same grain as Bronze).
--- Evidence: data_exploration_listings.sql (query N) and dbt_checks.sql (3x).
+-- Evidence: data_exploration_listings.sql (queries 2 to 19) and
+-- dbt_checks.sql (3a to 3c, 4a to 4c).
 -- 1. Dates become DATE. scraped_date is YYYY-MM-DD (query 8); host_since
 --    is day first, DD/MM/YYYY (query 10, check 3c).
 --    07_2020 has 4,780 rows dated 2020-09-05 (query 9), later than every
@@ -16,8 +17,8 @@
 -- 2. property_type: the naming style changed between May and August 2020
 --    (queries 17, 19). Rows scraped before 2020-08-01 are recoded to the
 --    new style with a rule based on room_type. The raw value is kept.
---    The rule will be checked again in dbt_checks.sql after all months
---    are loaded (Part 3).
+--    The rule was checked after all months were loaded
+--    (dbt_checks.sql 18h-3, 18i).
 -- 3. host_neighbourhood: UPPER and TRIM (the suburb file is uppercase),
 --    WAVERLY -> WAVERLEY (checks 3a, 3b), empty -> NULL.
 -- 4. t/f flags become boolean (queries 3, 4, 5). scrape_id is dropped
