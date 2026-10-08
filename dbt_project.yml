@@ -1,6 +1,7 @@
 name: "bde_at3"
 version: "1.0.0"
 config-version: 2
+require-dbt-version: ">=1.10.0"  # schema.yml uses the data_tests "arguments:" syntax
 
 profile: "default"
 
@@ -16,6 +17,9 @@ clean-targets: # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
 
+# Bronze, Silver and Gold star are tables rebuilt on every dbt build
+# (no incremental models; history is kept in the snapshots).
+# The datamarts are views, so they always show the latest build.
 models:
   bde_at3:
     bronze:
@@ -31,6 +35,8 @@ models:
       mart:
         +materialized: view
         +schema: gold
+
+# SCD2 snapshots (host, listing, lga, suburb) are stored in the silver schema.
 snapshots:
   bde_at3:
     +schema: silver
