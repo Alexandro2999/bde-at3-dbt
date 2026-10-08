@@ -64,7 +64,9 @@ Gold mart (schema gold, views)
   in development they get the dev schema as prefix (for example dbt_wsianipar_silver).
 
 ## Run
+```
 dbt deps
 dbt build
+```
 
 Production job: monthly_build (dbt deps and dbt build), run by hand after each monthly DAG load.
